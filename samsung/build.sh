@@ -254,6 +254,36 @@ create_kernel_zip()
                 md5sum kernel-cm-9-$(date +%Y%m%d)-${COMMAND}-signed.zip
                 cd ${TOP}
                 ;;
+            cooper)
+                cd out/target/product/${COMMAND}
+
+                rm -rf kernel_zip
+                rm kernel-cm-7-*
+
+                mkdir -p kernel_zip/system/lib/modules
+                mkdir -p kernel_zip/META-INF/com/google/android
+
+                echo "Copying boot.img..."
+                cp boot.img kernel_zip/
+                echo "Copying kernel modules..."
+                cp -R system/lib/modules/* kernel_zip/system/lib/modules
+                echo "Copying update-binary..."
+                cp obj/EXECUTABLES/updater_intermediates/updater kernel_zip/META-INF/com/google/android/update-binary
+                echo "Copying updater-script..."
+                cat ${TOP}/buildscripts/samsung/${COMMAND}/kernel_updater-script > kernel_zip/META-INF/com/google/android/updater-script
+                
+                echo "Zipping package..."
+                cd kernel_zip
+                zip -qr ../kernel-cm-7-$(date +%Y%m%d)-${COMMAND}.zip ./
+                cd ${TOP}/out/target/product/${COMMAND}
+
+                echo "Signing package..."
+                java -jar ${TOP}/out/host/linux-x86/framework/signapk.jar ${TOP}/build/target/product/security/testkey.x509.pem ${TOP}/build/target/product/security/testkey.pk8 kernel-cm-7-$(date +%Y%m%d)-${COMMAND}.zip kernel-cm-7-$(date +%Y%m%d)-${COMMAND}-signed.zip
+                rm kernel-cm-7-$(date +%Y%m%d)-${COMMAND}.zip
+                echo -e "${txtgrn}Package complete:${txtrst} out/target/product/${COMMAND}/kernel-cm-7-$(date +%Y%m%d)-${COMMAND}-signed.zip"
+                md5sum kernel-cm-7-$(date +%Y%m%d)-${COMMAND}-signed.zip
+                cd ${TOP}
+                ;;
             i777)
                 cd out/target/product/${COMMAND}
 
@@ -360,8 +390,12 @@ case "$COMMAND" in
 		lunch=cm_fascinatemtd-userdebug
 		;;
 	galaxys2)
+		lunch=cm_cooper-userdebug
+		;;
+	cooper)
 		lunch=cm_galaxys2-userdebug
 		;;
+
 	i777)
 		lunch=cm_i777-userdebug
 		;;
@@ -390,7 +424,7 @@ case "$COMMAND" in
 		echo -e "${txtred}Usage: $0 DEVICE ADDITIONAL"
 		echo -e "Example: ./build.sh galaxys2"
 		echo -e "Example: ./build.sh galaxys2 kernel"
-		echo -e "Supported Devices: captivatemtd, epic, fascinate, galaxys2, i777, galaxynote, galaxysmtd, galaxysbmtd, maguro, vibrantmtd${txtrst}"
+		echo -e "Supported Devices: captivatemtd, cooper, epic, fascinate, galaxys2, i777, galaxynote, galaxysmtd, galaxysbmtd, maguro, vibrantmtd${txtrst}"
 		exit 2
 		;;
 esac
