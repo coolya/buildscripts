@@ -390,10 +390,10 @@ case "$COMMAND" in
 		lunch=cm_fascinatemtd-userdebug
 		;;
 	galaxys2)
-		lunch=cm_cooper-userdebug
+		lunch=cm_galaxys2-userdebug
 		;;
 	cooper)
-		lunch=cm_galaxys2-userdebug
+		lunch=cm_cooper-userdebug
 		;;
 
 	i777)
